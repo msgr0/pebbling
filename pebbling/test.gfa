@@ -1,0 +1,4 @@
+S	s1	ACGTACGTACGT	LN:i:12
+S	s2	TGCATGCATGCA	LN:i:12
+L	s1	+	s2	+	4M
+P	path1	s1+,s2+	4M
