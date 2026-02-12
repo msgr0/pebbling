@@ -1,4 +1,18 @@
+S	s0	ACGTACGTACGT	LN:i:12
 S	s1	ACGTACGTACGT	LN:i:12
 S	s2	TGCATGCATGCA	LN:i:12
-L	s1	+	s2	+	4M
-P	path1	s1+,s2+	4M
+S	s3	TGCATGCATGCA	LN:i:12
+S	s4	TGCATGCATGCA	LN:i:12
+L	s0	+	s1	+	0M
+L	s0	+	s2	+	0M
+L	s1	+	s2	+	0M
+L	s2	+	s3	+	0M
+L	s3	+	s4	+	0M
+L	s0	+	s4	+	0M
+L	s1	+	s4	+	0M
+L	s4	+	s0	+	0M
+L	s3	+	s0	+	0M
+L	s2	+	s4	+	0M
+P	path1	s0+,s2+	0M
+P	path2	s1+,s2+,s3+	0M
+P	path3	s2+,s3-	0M

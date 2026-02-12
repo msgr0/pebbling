@@ -2,12 +2,12 @@
 
 CC = clang
 CFLAGS = -Wall -Wextra -std=c11 -Ilib -Ilib/gfatools
-DEBUG_FLAGS = -g -O0 -DDEBUG
-RELEASE_FLAGS = -O3 -march=native -DNDEBUG
+DEBUG_FLAGS = -g -O0 -DDEBUG -fsanitize=address
+RELEASE_FLAGS = -O2 -march=native -DNDEBUG
 
 SRCS = main.c
-OBJS = main.o
-DEBUG_OBJS = main_debug.o
+OBJS = main.o peb.o
+DEBUG_OBJS = main_debug.o peb.o
 
 GFATOOLS_LIB = lib/gfatools/libgfa1.a
 GFATOOLS_DIR = lib/gfatools
@@ -29,6 +29,8 @@ main.o: main.c
 main_debug.o: main.c
 	$(CC) $(CFLAGS) $(DEBUG_FLAGS) -c main.c -o $@
 
+
+
 # Debug build
 debug: $(DEBUG_TARGET)
 	@echo "✓ Built debug version: $(DEBUG_TARGET)"
@@ -38,37 +40,29 @@ $(DEBUG_TARGET): $(DEBUG_OBJS) $(GFATOOLS_LIB)
 
 # Real gfa test
 testr: $(TARGET)
-	@echo "Running real GFA test with abau-skesa.gfa..."
-	@./$(TARGET) abau-skesa.gfa Contig_10_1640.24
+	@echo "Running real GFA test with g_small.gfa..."
+	@./$(TARGET) g_small.gfa 0 10
 	@echo "✓ Real GFA test completed"
 # Test target - create a simple test GFA file and run the parser
 test: $(TARGET)
-	@echo "Creating test GFA file..."
-	@printf "S\ts1\tACGTACGTACGT\tLN:i:12\n" > test.gfa
-	@printf "S\ts2\tTGCATGCATGCA\tLN:i:12\n" >> test.gfa
-	@printf "L\ts1\t+\ts2\t+\t4M\n" >> test.gfa
-	@printf "P\tpath1\ts1+,s2+\t4M\n" >> test.gfa
 	@echo "Running parser on test.gfa..."
-	@./$(TARGET) test.gfa
+	@./$(TARGET) test.gfa 0 1
 	@echo "✓ Test completed"
 
 # Debug test - run with debug build
 debug_test: debug
-	@echo "Creating test GFA file..."
-	@printf "S\tseg1\tACGTACGTACGT\tLN:i:12\n" > test.gfa
-	@printf "S\tseg2\tTGCATGCATGCA\tLN:i:12\n" >> test.gfa
-	@printf "L\tseg1\t+\tseg2\t+\t4M\n" >> test.gfa
-	@printf "P\tpath1\tseg1+,seg2+\t4M\n" >> test.gfa
 	@echo "Running debug parser on test.gfa..."
-	@./$(DEBUG_TARGET) test.gfa
+	@./$(DEBUG_TARGET) test.gfa 0 1
+	@echo "✓ Debug test completed"
+# Debug testr - run with debug build
+debug_testr: debug
+	@echo "Running debug parser on prova.gfa..."
+	@./$(DEBUG_TARGET) prova.gfa 0 10
 	@echo "✓ Debug test completed"
 
 # Valgrind memory check (requires valgrind)
 memcheck: $(TARGET)
 	@echo "Running memory check with valgrind..."
-	@printf "S\tseg1\tACGTACGTACGT\tLN:i:12\n" > test.gfa
-	@printf "S\tseg2\tTGCATGCATGCA\tLN:i:12\n" >> test.gfa
-	@printf "L\tseg1\t+\tseg2\t+\t4M\n" >> test.gfa
 	valgrind --leak-check=full --show-leak-kinds=all ./$(TARGET) test.gfa
 
 # Build gfatools library
@@ -77,7 +71,7 @@ $(GFATOOLS_LIB):
 
 # Clean build artifacts
 clean:
-	rm -f $(OBJS) $(DEBUG_OBJS) $(TARGET) $(DEBUG_TARGET) test.gfa
+	rm -f $(OBJS) $(DEBUG_OBJS) $(TARGET) $(DEBUG_TARGET)
 	$(MAKE) -C $(GFATOOLS_DIR) clean
 	@echo "✓ Cleaned"
 
